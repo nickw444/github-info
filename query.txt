@@ -1,0 +1,59 @@
+{
+  user(login: "{username}") {
+    branchPR: pullRequests(first: 10, headRefName: "{branchname}") {
+      nodes {
+        number
+        title
+        url
+      }
+    }
+    openPRs: pullRequests(last: 50, states: [OPEN]) {
+      totalCount
+      nodes {
+        number
+        url
+        title
+        headRefName
+        reviewRequests(first: 10) {
+          nodes {
+            id
+            requestedReviewer {
+              ... on User {
+                login
+                name
+              }
+            }
+          }
+        }
+        reviews(first: 10, states: [PENDING, COMMENTED, APPROVED, CHANGES_REQUESTED, DISMISSED]) {
+          nodes {
+            id
+            state
+            author {
+              avatarUrl
+              login
+              resourcePath
+              url
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+  reviewRequests: search(query: "is:open is:pr review-requested:{username} archived:false", type: ISSUE, first: 10) {
+    nodes {
+      ... on PullRequest {
+        number
+        title
+        url
+        author {
+          login
+        }
+      }
+    }
+  }
+}
