@@ -14,7 +14,18 @@
         url
         title
         headRefName
-        reviewRequests(first: 10) {
+        mergeable
+        commits(last:1) {
+          nodes {
+            commit {
+              oid
+              status {
+                state
+              }
+            }
+          }
+        }
+        reviewRequests(last: 50) {
           nodes {
             id
             requestedReviewer {
@@ -25,7 +36,7 @@
             }
           }
         }
-        reviews(first: 10, states: [PENDING, COMMENTED, APPROVED, CHANGES_REQUESTED, DISMISSED]) {
+        reviews(last: 50, states: [PENDING, COMMENTED, APPROVED, CHANGES_REQUESTED, DISMISSED]) {
           nodes {
             id
             state
