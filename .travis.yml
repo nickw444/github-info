@@ -2,6 +2,9 @@ language: python
 python:
   - "3.6"
 
+install:
+  - pip install .
+
 before_deploy:
   - git describe --dirty --always > VERSION
 
