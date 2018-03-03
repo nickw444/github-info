@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import argparse
 import json
 import os
@@ -12,6 +11,7 @@ from typing import Optional
 import colored
 from colored import stylize
 import requests
+
 
 def make_pr_factory(current_user: str):
     def make_pr(pull, with_author=False, with_number=True, with_reviews=False, with_branch=False, with_status=True,
@@ -147,7 +147,7 @@ def check_current_branch(data, repo_url, current_branch, make_pr, base_branch='m
 
 
 def make_request(user, head_ref, token):
-    query = open(os.path.join(os.path.dirname(__file__), 'query.txt')).read()
+    query = get_query()
     query = query.replace('{username}', user)
     query = query.replace('{branchname}', head_ref)
 
@@ -161,6 +161,81 @@ def make_request(user, head_ref, token):
         raise Exception("Request failed ({}): {}".format(resp.status_code, resp.text))
 
     return resp.json()
+
+
+def get_query():
+    return '''
+{
+  user(login: "{username}") {
+    branchPR: pullRequests(first: 10, headRefName: "{branchname}") {
+      nodes {
+        number
+        title
+        url
+      }
+    }
+    openPRs: pullRequests(last: 50, states: [OPEN]) {
+      totalCount
+      nodes {
+        number
+        url
+        title
+        headRefName
+        mergeable
+        commits(last:1) {
+          nodes {
+            commit {
+              oid
+              status {
+                state
+              }
+            }
+          }
+        }
+        reviewRequests(last: 50) {
+          nodes {
+            id
+            requestedReviewer {
+              ... on User {
+                login
+                name
+              }
+            }
+          }
+        }
+        reviews(last: 50, states: [PENDING, COMMENTED, APPROVED, CHANGES_REQUESTED, DISMISSED]) {
+          nodes {
+            id
+            state
+            author {
+              avatarUrl
+              login
+              resourcePath
+              url
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+  reviewRequests: search(query: "is:open is:pr review-requested:{username} archived:false", type: ISSUE, first: 10) {
+    nodes {
+      ... on PullRequest {
+        number
+        title
+        url
+        author {
+          login
+        }
+      }
+    }
+  }
+} 
+'''.strip()
 
 
 def get_repo_current_branch():
@@ -255,7 +330,8 @@ def run(args):
     data = response['data']
     check_open_prs(data, repo_namespace, make_pr)
     check_pending_reviews(data, make_pr)
-    check_current_branch(data, 'https://github.com/{}'.format(repo_namespace), make_pr=make_pr, current_branch=current_branch)
+    check_current_branch(data, 'https://github.com/{}'.format(repo_namespace), make_pr=make_pr,
+                         current_branch=current_branch)
 
 
 def main():
@@ -269,6 +345,4 @@ def main():
         args.func(args)
     else:
         run(args)
-
-
 main()
