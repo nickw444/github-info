@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.6"
+
+before_deploy:
+  - git describe --dirty --always > VERSION
+
+deploy:
+  provider: pypi
+  user: nickw444-deploy
+  password: "$PYPI_PASSWORD"
+  on:
+    tags: true
