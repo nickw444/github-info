@@ -25,3 +25,5 @@ github-info configure
 ```
 github-info
 ```
+
+![demo](demo.png)
