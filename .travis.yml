@@ -5,6 +5,9 @@ python:
 install:
   - pip install .
 
+script:
+  - echo "TODO: add tests"
+
 before_deploy:
   - git describe --dirty --always > VERSION
 
