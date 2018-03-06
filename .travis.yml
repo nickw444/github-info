@@ -10,6 +10,8 @@ script:
 
 before_deploy:
   - git describe --dirty --always > VERSION
+  - echo "Version"
+  - cat VERSION
 
 deploy:
   provider: pypi
