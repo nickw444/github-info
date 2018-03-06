@@ -10,12 +10,11 @@ script:
 
 before_deploy:
   - git describe --dirty --always > VERSION
-  - echo "Version"
-  - cat VERSION
 
 deploy:
   provider: pypi
   user: nickw444-deploy
   password: "$PYPI_PASSWORD"
+  skip_cleanup: true
   on:
     tags: true
