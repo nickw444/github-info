@@ -35,6 +35,6 @@ setup(
     scripts=['bin/github-info'],
     install_requires=[
         'colored==1.3.5',
-        'requests==2.18.4'
+        'requests==2.20.0'
     ]
 )
